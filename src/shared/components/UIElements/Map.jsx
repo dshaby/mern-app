@@ -1,10 +1,6 @@
 import "./Map.css";
 import { useEffect, useRef } from "react";
 const Map = (props) => {
-  //   const map = new google.maps.Map(document.getElementById("map"), {
-  //       center:
-  //   })
-
   const mapRef = useRef();
 
   const { center, zoom } = props;
