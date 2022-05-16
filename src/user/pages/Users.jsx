@@ -1,20 +1,49 @@
+import { useEffect, useState } from "react";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
 import UsersList from "../components/UsersList";
 
 const Users = (props) => {
-  const USERS = [
-    {
-      id: "u1",
-      name: "Daniel Shaby",
-      image:
-        "https://media-exp1.licdn.com/dms/image/C5603AQEcf3YnTWxmRA/profile-displayphoto-shrink_800_800/0/1628197960316?e=1657152000&v=beta&t=HBhLA_lEy77PTWYGCGCXuJkNwXQFpuomrj_d86UYkho",
-      placeCount: 3,
-    },
-  ];
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState();
+  const [loadedUsers, setLoadedUsers] = useState();
+
+  useEffect(() => {
+    const sendRequest = async () => {
+      try {
+        setIsLoading(true);
+
+        const response = await fetch("http://localhost:5000/api/users");
+        const responseData = await response.json();
+        console.log(responseData);
+
+        if (!response.ok) {
+          throw new Error(responseData.message);
+        }
+
+        setLoadedUsers(responseData.users);
+      } catch (err) {
+        setError(err.message || "Getting users went wrong");
+      }
+      setIsLoading(false);
+    };
+    sendRequest();
+  }, []);
+
+  const errorHandler = () => {
+    setError(null);
+  };
 
   return (
-    <div>
-      <UsersList items={USERS} />
-    </div>
+    <>
+      <ErrorModal error={error} onClear={errorHandler} />
+      {isLoading && (
+        <div className="center">
+          <LoadingSpinner />
+        </div>
+      )}
+      {!isLoading && loadedUsers && <UsersList items={loadedUsers} />}
+    </>
   );
 };
 
