@@ -1,42 +1,30 @@
 import { useEffect, useState } from "react";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { useHttpClient } from "../../shared/hooks/http-hook";
 import UsersList from "../components/UsersList";
 
-const Users = (props) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+const Users = () => {
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const [loadedUsers, setLoadedUsers] = useState();
 
   useEffect(() => {
-    const sendRequest = async () => {
+    const fetchUsers = async () => {
       try {
-        setIsLoading(true);
-
-        const response = await fetch("http://localhost:5000/api/users");
-        const responseData = await response.json();
-        console.log(responseData);
-
-        if (!response.ok) {
-          throw new Error(responseData.message);
-        }
-
+        const responseData = await sendRequest(
+          "http://localhost:5000/api/users"
+        );
         setLoadedUsers(responseData.users);
-      } catch (err) {
-        setError(err.message || "Getting users went wrong");
-      }
-      setIsLoading(false);
+      } catch (err) {}
     };
-    sendRequest();
-  }, []);
-
-  const errorHandler = () => {
-    setError(null);
-  };
+    fetchUsers();
+  }, [sendRequest]);
+  // sendRequest IS a dependency of useEffect, bcz
+  // it comes from outside of useEffect, but we're using it inside
 
   return (
     <>
-      <ErrorModal error={error} onClear={errorHandler} />
+      <ErrorModal error={error} onClear={clearError} />
       {isLoading && (
         <div className="center">
           <LoadingSpinner />

@@ -20,15 +20,23 @@ export const useHttpClient = () => {
         });
 
         const responseData = await response.json();
+
+        // removes reqCtrl that has to do with this request
+        // bcz response already received, no need to control request
+        activeHttpRequests.current = activeHttpRequests.current.filter(
+          (reqCtrl) => reqCtrl !== httpAbortCtrl
+        );
+
         if (!response.ok) {
           throw new Error(responseData.message);
         }
-
+        setIsLoading(false);
         return responseData;
       } catch (err) {
         setError(err.message || "Something went wrong");
+        setIsLoading(false);
+        throw err;
       }
-      setIsLoading(false);
     },
     []
   );
