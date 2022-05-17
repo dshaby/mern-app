@@ -52,7 +52,7 @@ const NewPlace = () => {
         { "Content-Type": "application/json" }
       );
       // Redirect user to a different page -> My places
-      navigate(`/`);
+      navigate(`/${auth.userId}/places`);
     } catch (err) {}
   };
 

@@ -1,42 +1,40 @@
 import PlaceList from "../components/PlaceList";
 import { useParams } from "react-router-dom";
-
-const DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Empire State Building",
-    description: "One of the most famous sky scrapers in the world!",
-    imageURL:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Empire_State_Building_%28aerial_view%29.jpg/800px-Empire_State_Building_%28aerial_view%29.jpg",
-    address: "20 W 34th St, New York, NY 10001",
-    location: {
-      lat: 40.74938333910976,
-      lng: -73.98542836562419,
-    },
-    creator: "u1",
-  },
-  {
-    id: "p2",
-    title: "EMP. State Building",
-    description: "One of the most famous sky scrapers in the world!",
-    imageURL:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Empire_State_Building_%28aerial_view%29.jpg/800px-Empire_State_Building_%28aerial_view%29.jpg",
-    address: "20 W 34th St, New York, NY 10001",
-    location: {
-      lat: 40.74938333910976,
-      lng: -73.98542836562419,
-    },
-    creator: "u2",
-  },
-];
+import { useHttpClient } from "../../shared/hooks/http-hook";
+import ErrorModal from "../../shared/components/UIElements/ErrorModal";
+import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import { useEffect, useState } from "react";
 
 const UserPlaces = (props) => {
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
+  const [loadedPlaces, setLoadedPlaces] = useState();
+
   const userId = useParams().userId;
-  const loadedPlaces = DUMMY_PLACES.filter((place) => place.creator === userId);
+
+  useEffect(() => {
+    const fetchPlaces = async () => {
+      try {
+        const responseData = await sendRequest(
+          `http://localhost:5000/api/places/user/${userId}`
+        );
+        setLoadedPlaces(responseData.userWithPlaces.places);
+      } catch (err) {}
+    };
+    fetchPlaces();
+  }, [sendRequest, userId]);
+
   return (
-    <div>
-      <PlaceList items={loadedPlaces} />
-    </div>
+    <>
+      <ErrorModal error={error} onClear={clearError} />
+      <div>
+        {isLoading && (
+          <div className="center">
+            <LoadingSpinner />
+          </div>
+        )}
+        {!isLoading && loadedPlaces && <PlaceList items={loadedPlaces} />}
+      </div>
+    </>
   );
 };
 
