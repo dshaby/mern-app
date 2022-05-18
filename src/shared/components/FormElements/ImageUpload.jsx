@@ -24,6 +24,7 @@ const ImageUpload = (props) => {
     let pickedFile;
     let fileIsValid = isValid;
     if (event.target.files && event.target.files.length === 1) {
+      console.log(event);
       pickedFile = event.target.files[0];
       //   ALT
       // setPreviewUrl(window.URL.createObjectURL(pickedFile));
