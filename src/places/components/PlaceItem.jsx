@@ -35,22 +35,17 @@ const PlaceItem = (props) => {
   const confirmDeleteHandler = async () => {
     try {
       setShowConfirmModal(false);
-      const responseData = await sendRequest(
+      await sendRequest(
         `http://localhost:5000/api/places/${props.id}`,
         "DELETE"
       );
-      console.log(responseData);
-      navigate(`/`);
+      navigate("/" + auth.userId + "/places");
+      props.onDelete(props.id);
     } catch (err) {}
   };
 
   return (
     <>
-      {isLoading && (
-        <div className="center">
-          <LoadingSpinner />
-        </div>
-      )}
       <ErrorModal error={error} onClear={clearError} />
       <Modal
         show={showMap}
@@ -87,6 +82,11 @@ const PlaceItem = (props) => {
       </Modal>
       <li className="place-item">
         <Card className="place-item__content">
+          {isLoading && (
+            <div className="center">
+              <LoadingSpinner />
+            </div>
+          )}
           <div className="place-item__image">
             <img src={props.image} alt={props.title} />
           </div>
@@ -99,10 +99,10 @@ const PlaceItem = (props) => {
             <Button inverse onClick={openMapHandler}>
               VIEW ON MAP
             </Button>
-            {auth.isLoggedIn && (
+            {auth.isLoggedIn && auth.userId === props.creatorId && (
               <Button to={`/places/${props.id}`}>EDIT</Button>
             )}
-            {auth.isLoggedIn && (
+            {auth.isLoggedIn && auth.userId === props.creatorId && (
               <Button danger onClick={showDeleteWarningHandler}>
                 DELETE
               </Button>
