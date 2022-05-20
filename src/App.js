@@ -5,56 +5,25 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import Users from "./user/pages/Users";
-import UserPlaces from "./places/pages/UserPlaces";
-import NewPlace from "./places/pages/NewPlace";
+// import Users from "./user/pages/Users";
+// import UserPlaces from "./places/pages/UserPlaces";
+// import NewPlace from "./places/pages/NewPlace";
 import MainNavigation from "./shared/components/Navigation/MainNavigation";
-import UpdatePlace from "./places/pages/UpdatePlace";
-import Auth from "./user/pages/Auth";
+// import UpdatePlace from "./places/pages/UpdatePlace";
+// import Auth from "./user/pages/Auth";
 import { AuthContext } from "./shared/context/auth-context";
-import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "./shared/hooks/auth-hook";
+import React, { Suspense } from "react";
+import LoadingSpinner from "./shared/components/UIElements/LoadingSpinner";
+
+const Users = React.lazy(() => import("./user/pages/Users"));
+const NewPlace = React.lazy(() => import("./places/pages/NewPlace"));
+const UserPlaces = React.lazy(() => import("./places/pages/UserPlaces"));
+const UpdatePlace = React.lazy(() => import("./places/pages/UpdatePlace"));
+const Auth = React.lazy(() => import("./user/pages/Auth"));
 
 const App = () => {
-  const [token, setToken] = useState(false);
-  const [userId, setUserId] = useState();
-
-  const login = useCallback((userId, token, expirationDate) => {
-    setToken(token);
-    setUserId(userId);
-    const tokenExpirationDate =
-      expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60); //i.e. one hour in the future
-    localStorage.setItem(
-      "userData",
-      JSON.stringify({
-        userId: userId,
-        token: token,
-        expiration: tokenExpirationDate.toISOString(),
-      })
-    );
-  }, []);
-
-  const logout = useCallback(() => {
-    setToken(null);
-    setUserId(null);
-    localStorage.removeItem("userData");
-  }, []);
-
-  useEffect(() => {
-    const storedData = JSON.parse(localStorage.getItem("userData"));
-
-    if (
-      storedData &&
-      storedData.token &&
-      new Date(storedData.expiration) > new Date()
-    ) {
-      login(
-        storedData.userId,
-        storedData.token,
-        new Date(storedData.expiration)
-      );
-    }
-  }, [login]);
-
+  const { token, login, logout, userId } = useAuth();
   let routes;
 
   if (token) {
@@ -90,7 +59,17 @@ const App = () => {
     >
       <Router>
         <MainNavigation />
-        <main>{routes}</main>
+        <main>
+          <Suspense
+            fallback={
+              <div className="center">
+                <LoadingSpinner />
+              </div>
+            }
+          >
+            {routes}
+          </Suspense>
+        </main>
       </Router>
     </AuthContext.Provider>
   );
