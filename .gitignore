@@ -28,3 +28,4 @@ yarn-error.log*
 # Temporary:
 /public/index.html
 public/index.html
+.firebase/hosting.YnVpbGQ.cache
